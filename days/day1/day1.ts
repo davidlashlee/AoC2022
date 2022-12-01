@@ -30,7 +30,6 @@ const getSum = (total: number, num: number) => {
 };
 
 const findLargestThree = (data: number[]): number[] => {
-
   return data.sort(compareNumbers);
 };
 
