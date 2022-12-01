@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var fs = require("fs");
-var data = fs.readFileSync("day1data.txt", "utf-8").split("\n");
+var data = fs.readFileSync("data.txt", "utf-8").split("\n");
 var parser = function (data) {
     var dataContainer = [];
     var tempContainer = [];
