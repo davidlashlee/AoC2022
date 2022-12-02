@@ -18,46 +18,41 @@ class Game {
 
   constructor(theirPlay: string, myPlay: string) {
     this.theirPlay = this.parsePlayInput(theirPlay);
-    this.myPlay = this.parseRoundObjective(myPlay);
+    this.myPlay = this.parsePlayInput(myPlay);
     this.startingScore = myPlayScore;
-    this.gameScore = this.playGame();
+    this.gameScore = this.playGame() + this.startingScore[this.myPlay as PlayScoreTypes] + 1;
   }
 
   parsePlayInput = (play: string) => {
     switch (play) {
       case "A":
+      case "X": {
         return "rock";
+      }
       case "B":
+      case "Y": {
         return "paper";
+      }
       case "C":
+      case "Z": {
         return "scissors";
+      }
       default:
         return "error";
     }
-  };
-
-  parseRoundObjective = (input: string) => {
-    if (input === "X") return "loose";
-    if (input === "Y") return "draw";
-    if (input === "Z") return "win";
-    else return "error";
   };
 
   playGame = (): number => {
     let myPlay = this.myPlay;
     let theirPlay = this.theirPlay;
     console.log("playing the game", myPlay, theirPlay);
-    if (myPlay === "draw") return this.startingScore[this.theirPlay as PlayScoreTypes] + 4;
-    if (myPlay === "loose") {
-      if (theirPlay === "rock") return 3;
-      if (theirPlay === "paper") return 1;
-      if (theirPlay === "scissors") return 2;
-    }
-    if (myPlay === "win") {
-      if (theirPlay === "rock") return 8;
-      if (theirPlay === "paper") return 9;
-      if (theirPlay === "scissors") return 7;
-    }
+    if (myPlay === theirPlay) return 3;
+    if (myPlay === "rock" && theirPlay === "scissors") return 6;
+    if (myPlay === "paper" && theirPlay === "rock") return 6;
+    if (myPlay === "scissors" && theirPlay === "paper") return 6;
+    if (theirPlay === "rock" && myPlay === "scissors") return 0;
+    if (theirPlay === "paper" && myPlay === "rock") return 0;
+    if (theirPlay === "scissors" && myPlay === "paper") return 0;
     return 99999999999999999;
   };
 }

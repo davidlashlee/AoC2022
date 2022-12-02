@@ -15,45 +15,53 @@ var Game = /** @class */ (function () {
         this.parsePlayInput = function (play) {
             switch (play) {
                 case "A":
-                case "X": {
                     return "rock";
-                }
                 case "B":
-                case "Y": {
                     return "paper";
-                }
                 case "C":
-                case "Z": {
                     return "scissors";
-                }
                 default:
                     return "error";
             }
+        };
+        this.parseRoundObjective = function (input) {
+            if (input === "X")
+                return "loose";
+            if (input === "Y")
+                return "draw";
+            if (input === "Z")
+                return "win";
+            else
+                return "error";
         };
         this.playGame = function () {
             var myPlay = _this.myPlay;
             var theirPlay = _this.theirPlay;
             console.log("playing the game", myPlay, theirPlay);
-            if (myPlay === theirPlay)
-                return 3;
-            if (myPlay === "rock" && theirPlay === "scissors")
-                return 6;
-            if (myPlay === "paper" && theirPlay === "rock")
-                return 6;
-            if (myPlay === "scissors" && theirPlay === "paper")
-                return 6;
-            if (theirPlay === "rock" && myPlay === "scissors")
-                return 0;
-            if (theirPlay === "paper" && myPlay === "rock")
-                return 0;
-            if (theirPlay === "scissors" && myPlay === "paper")
-                return 0;
+            if (myPlay === "draw")
+                return _this.startingScore[_this.theirPlay] + 4;
+            if (myPlay === "loose") {
+                if (theirPlay === "rock")
+                    return 3;
+                if (theirPlay === "paper")
+                    return 1;
+                if (theirPlay === "scissors")
+                    return 2;
+            }
+            if (myPlay === "win") {
+                if (theirPlay === "rock")
+                    return 8;
+                if (theirPlay === "paper")
+                    return 9;
+                if (theirPlay === "scissors")
+                    return 7;
+            }
             return 99999999999999999;
         };
         this.theirPlay = this.parsePlayInput(theirPlay);
-        this.myPlay = this.parsePlayInput(myPlay);
+        this.myPlay = this.parseRoundObjective(myPlay);
         this.startingScore = myPlayScore;
-        this.gameScore = this.playGame() + this.startingScore[this.myPlay] + 1;
+        this.gameScore = this.playGame();
     }
     return Game;
 }());
