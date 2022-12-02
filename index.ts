@@ -1,51 +1,69 @@
 import * as fs from "fs";
 
-let data = fs.readFileSync("day1data.txt", "utf-8").split("\n");
+let gamesData = fs.readFileSync("data.txt", "utf-8").split("\n");
 
-const parser = (data: String[]) => {
-  let dataContainer: Number[][] = [];
-  let tempContainer: Number[] = [];
-  data.forEach((dataInstance) => {
-    if (dataInstance.length > 1) {
-      tempContainer.push(parseFloat(dataInstance.toString()));
-    } else {
-      dataContainer?.push(tempContainer);
-      tempContainer = new Array();
+enum myPlayScore {
+  "rock",
+  "paper",
+  "scissors",
+}
+
+declare type PlayScoreTypes = keyof typeof myPlayScore;
+
+class Game {
+  theirPlay: string;
+  myPlay: string;
+  startingScore = myPlayScore;
+  gameScore: number;
+
+  constructor(theirPlay: string, myPlay: string) {
+    this.theirPlay = this.parsePlayInput(theirPlay);
+    this.myPlay = this.parsePlayInput(myPlay);
+    this.startingScore = myPlayScore;
+    this.gameScore = this.playGame() + this.startingScore[this.myPlay as PlayScoreTypes] + 1;
+  }
+
+  parsePlayInput = (play: string) => {
+    switch (play) {
+      case "A":
+      case "X": {
+        return "rock";
+      }
+      case "B":
+      case "Y": {
+        return "paper";
+      }
+      case "C":
+      case "Z": {
+        return "scissors";
+      }
+      default:
+        return "error";
     }
-  });
-  return dataContainer as number[][];
-};
+  };
 
-const cleanUpData = (nestedData: number[][]) => {
-  let dataContainer: number[] = [];
+  playGame = (): number => {
+    let myPlay = this.myPlay;
+    let theirPlay = this.theirPlay;
+    console.log("playing the game", myPlay, theirPlay);
+    if (myPlay === theirPlay) return 3;
+    if (myPlay === "rock" && theirPlay === "scissors") return 6;
+    if (myPlay === "paper" && theirPlay === "rock") return 6;
+    if (myPlay === "scissors" && theirPlay === "paper") return 6;
+    if (theirPlay === "rock" && myPlay === "scissors") return 0;
+    if (theirPlay === "paper" && myPlay === "rock") return 0;
+    if (theirPlay === "scissors" && myPlay === "paper") return 0;
+    return 99999999999999999;
+  };
+}
 
-  nestedData.forEach((data) => {
-    dataContainer.push(data.reduce(getSum, 0));
-  });
-  return dataContainer;
-};
+let totals = 0;
 
-const getSum = (total: number, num: number) => {
-  return total + num;
-};
+gamesData.forEach((gameRound) => {
+  if (gameRound[0] && gameRound[2]) {
+    let playTheGame = new Game(gameRound[0], gameRound[2]);
+    totals += playTheGame.gameScore;
+  }
+});
 
-const findLargestThree = (data: number[]): number[] => {
-
-  return data.sort(compareNumbers);
-};
-
-let compareNumbers = (a: number, b: number): number => {
-  return b - a;
-};
-
-let sorted = findLargestThree(cleanUpData(parser(data)));
-
-console.log(sorted);
-
-let answer = 0;
-
-answer += sorted[0]!;
-answer += sorted[1]!;
-answer += sorted[2]!;
-
-console.log(answer);
+console.log(totals);
