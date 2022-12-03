@@ -14,7 +14,7 @@ class Game {
   theirPlay: string;
   myPlay: string;
   startingScore = myPlayScore;
-  gameScore: number;
+  gameScore: number | void;
 
   constructor(theirPlay: string, myPlay: string) {
     this.theirPlay = this.parsePlayInput(theirPlay);
@@ -40,10 +40,10 @@ class Game {
     if (input === "X") return "loose";
     if (input === "Y") return "draw";
     if (input === "Z") return "win";
-    else return "error";
+    return "error";
   };
 
-  playGame = (): number => {
+  playGame = (): number | void => {
     let myPlay = this.myPlay;
     let theirPlay = this.theirPlay;
     console.log("playing the game", myPlay, theirPlay);
@@ -58,7 +58,6 @@ class Game {
       if (theirPlay === "paper") return 9;
       if (theirPlay === "scissors") return 7;
     }
-    return 99999999999999999;
   };
 }
 
@@ -67,7 +66,10 @@ let totals = 0;
 gamesData.forEach((gameRound) => {
   if (gameRound[0] && gameRound[2]) {
     let playTheGame = new Game(gameRound[0], gameRound[2]);
-    totals += playTheGame.gameScore;
+    let roundScore = playTheGame.gameScore;
+    if (typeof roundScore === "number") {
+      totals += roundScore;
+    }
   }
 });
 

@@ -18,7 +18,6 @@ const parser = (data: String[]) => {
 
 const cleanUpData = (nestedData: number[][]) => {
   let dataContainer: number[] = [];
-
   nestedData.forEach((data) => {
     dataContainer.push(data.reduce(getSum, 0));
   });
@@ -29,7 +28,7 @@ const getSum = (total: number, num: number) => {
   return total + num;
 };
 
-const findLargestThree = (data: number[]): number[] => {
+const sortDataBySum = (data: number[]): number[] => {
   return data.sort(compareNumbers);
 };
 
@@ -37,7 +36,7 @@ let compareNumbers = (a: number, b: number): number => {
   return b - a;
 };
 
-let sorted = findLargestThree(cleanUpData(parser(data)));
+let sorted = sortDataBySum(cleanUpData(parser(data)));
 
 console.log(sorted);
 
