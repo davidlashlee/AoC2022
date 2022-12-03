@@ -2,12 +2,12 @@ import * as fs from "fs";
 
 let data = fs.readFileSync("day1data.txt", "utf-8").split("\n");
 
-const parser = (data: String[]) => {
-  let dataContainer: Number[][] = [];
-  let tempContainer: Number[] = [];
+const parser = (data: string[]) => {
+  let dataContainer: number[][] = [];
+  let tempContainer: number[] = [];
   data.forEach((dataInstance) => {
     if (dataInstance.length > 1) {
-      tempContainer.push(parseFloat(dataInstance.toString()));
+      tempContainer.push(parseFloat(dataInstance));
     } else {
       dataContainer?.push(tempContainer);
       tempContainer = new Array();
