@@ -13,29 +13,22 @@ const findMatchingSymbol = (satchles: string[]) => {
   [firstSatchle, secondSatchle, ...thirdSatchle] = satchles;
   if (satchles && firstSatchle && secondSatchle && thirdSatchle) {
     for (let i = 0; i < firstSatchle.length; i++) {
-      if (typeof firstSatchle[i] === "string") {
-        let letter = firstSatchle[i] as string;
-        if (secondSatchle.includes(letter) && thirdSatchle.includes(letter)) {
-          return letter;
-        }
+      let letter = firstSatchle[i];
+      if (letter && secondSatchle.includes(letter) && thirdSatchle.includes(letter)) {
+        return letter;
       }
     }
   }
   return "errors";
 };
 
-const getScore = (letter: string | null): number | null => {
+const getScore = (letter: string | null): number => {
+  let score = 0;
   if (letter) {
     const ascii = letter.charCodeAt(0);
-    if (letter.toUpperCase() === letter) {
-      let score = ascii - 38;
-      return score;
-    } else {
-      let score = ascii - 96;
-      return score;
-    }
+    letter.toUpperCase() === letter ? (score = ascii - 38) : (score = ascii - 96);
   }
-  return null;
+  return score;
 };
 let total = 0;
 

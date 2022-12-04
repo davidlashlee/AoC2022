@@ -1,52 +1,41 @@
 "use strict";
 exports.__esModule = true;
 var fs = require("fs");
-var lodash_1 = require("lodash");
-var errors = 0;
-var satchleData = fs.readFileSync("data.txt", "utf-8").split("\n");
-var chopArray = function (data, subsetSize) {
-    if (subsetSize === void 0) { subsetSize = 3; }
-    var chopped = (0, lodash_1.chunk)(data, subsetSize);
-    chopped.pop();
-    return chopped;
-};
-var findMatchingSymbol = function (satchles) {
-    console.log("findingSymbols in ", satchles);
-    if (satchles && satchles[0] && satchles[1] && satchles[2]) {
-        for (var i = 0; i < satchles[0].length; i++) {
-            if (typeof satchles[0][i] === "string") {
-                var letter = satchles[0][i];
-                if (satchles[1].includes(letter) && satchles[2].includes(letter)) {
-                    console.log("found a match", letter);
-                    return letter;
-                }
-            }
-        }
+var data = fs.readFileSync("data.txt", "utf-8").split("\n");
+var elfPairContainer = [];
+var fullyContainsCounter = 0;
+var Elf = /** @class */ (function () {
+    function Elf(start, end) {
+        this.start = start;
+        this.end = end;
     }
-    console.log("ERROR in findMatchingSymbolv2");
-    errors++;
-    return "errors";
-};
-var getScore = function (letter) {
-    if (letter) {
-        var ascii = letter.charCodeAt(0);
-        if (letter.toUpperCase() === letter) {
-            var score = ascii - 38;
-            return score;
+    return Elf;
+}());
+data.forEach(function (pair) {
+    var elfPair = [];
+    var splitPair = pair.split(",");
+    splitPair.forEach(function (elf) {
+        var elfInfo = elf.split("-");
+        console.log("elfInfo", elfInfo);
+        if (elfInfo[0] && elfInfo[1]) {
+            var elfie = new Elf(parseFloat(elfInfo[0]), parseFloat(elfInfo[1]));
+            elfPair.push(elfie);
         }
-        else {
-            var score = ascii - 96;
-            return score;
-        }
-    }
-    return null;
-};
-var total = 0;
-chopArray(satchleData).forEach(function (satchelSet) {
-    var score = getScore(findMatchingSymbol(satchelSet));
-    if (score) {
-        total += score;
-    }
+    });
+    elfPairContainer.push(elfPair);
+    console.log(elfPair);
 });
-console.log(total);
-console.log(errors);
+var errorCount = 0;
+elfPairContainer.forEach(function (elfPair) {
+    var firstElf, secondElf;
+    firstElf = elfPair[0], secondElf = elfPair[1];
+    if (firstElf && secondElf) {
+        if ((firstElf.start <= secondElf.start && firstElf.end >= secondElf.start) || (secondElf.start <= firstElf.start && secondElf.end >= firstElf.start)) {
+            //console.log("firstElf contains secondElf area", firstElf, secondElf);
+            fullyContainsCounter++;
+        }
+    }
+    else
+        errorCount++;
+});
+console.log(fullyContainsCounter);
