@@ -17,8 +17,8 @@ var Crate = /** @class */ (function () {
 var Instructions = /** @class */ (function () {
     function Instructions(moveAmount, from, to) {
         this.moveAmount = moveAmount;
-        this.from = from;
-        this.to = to;
+        this.from = from - 1;
+        this.to = to - 1;
     }
     return Instructions;
 }());
@@ -45,4 +45,23 @@ instructionData.forEach(function (i) {
     var parsed = i.replace(/\D/g, "");
     instructionList.push(new Instructions(parseFloat(parsed[0]), parseFloat(parsed[1]), parseFloat(parsed[2])));
 });
-console.log(instructionList);
+// ITS FINE console.log(instructionList, "instructionList");
+// console.log(warehouse);
+console.log(warehouse[0]);
+instructionList.forEach(function (instruction) {
+    for (var i = 0; i < instruction.moveAmount; i++) {
+        if (warehouse && warehouse[instruction.from] && warehouse[instruction.to]) {
+            var fromColumn = warehouse[instruction.from];
+            var toColumn = warehouse[instruction.to];
+            if (fromColumn && (fromColumn === null || fromColumn === void 0 ? void 0 : fromColumn[0])) {
+                var crateToMove = fromColumn[0];
+                toColumn === null || toColumn === void 0 ? void 0 : toColumn.unshift(crateToMove);
+                fromColumn === null || fromColumn === void 0 ? void 0 : fromColumn.shift();
+            }
+        }
+    }
+});
+/*
+warehouse.forEach((column) => {
+  console.log(column[0]);
+}); */

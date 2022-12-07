@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import { pull } from "lodash";
 let data = fs.readFileSync("data.txt", "utf-8").split("\n");
 let wareHouseData = data.slice(0, 7);
 let instructionData = data.slice(10, data.length - 1);
@@ -23,8 +22,8 @@ class Instructions {
 
   constructor(moveAmount: number, from: number, to: number) {
     this.moveAmount = moveAmount;
-    this.from = from;
-    this.to = to;
+    this.from = from - 1;
+    this.to = to - 1;
   }
 }
 
@@ -55,4 +54,25 @@ instructionData.forEach((i) => {
   instructionList.push(new Instructions(parseFloat(parsed[0]!), parseFloat(parsed[1]!), parseFloat(parsed[2]!)));
 });
 
-console.log(instructionList);
+// ITS FINE console.log(instructionList, "instructionList");
+// console.log(warehouse);
+
+console.log(warehouse[0]);
+
+instructionList.forEach((instruction) => {
+  for (let i = 0; i < instruction.moveAmount; i++) {
+    if (warehouse && warehouse[instruction.from] && warehouse[instruction.to]) {
+      let fromColumn = warehouse[instruction.from];
+      let toColumn = warehouse[instruction.to];
+      if (fromColumn && fromColumn?.[0]) {
+        let crateToMove = fromColumn[0];
+        toColumn?.unshift(crateToMove);
+        fromColumn?.shift();
+      }
+    }
+  }
+});
+/*
+warehouse.forEach((column) => {
+  console.log(column[0]);
+}); */
