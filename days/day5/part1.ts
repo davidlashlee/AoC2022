@@ -43,7 +43,7 @@ const pullOutGrid = (rawData: string, rowIndex: number) => {
 };
 
 wareHouseData.forEach((warehouseRow, index) => {
-    cratehouse.push(pullOutGrid(warehouseRow, index + 1));
+  cratehouse.push(pullOutGrid(warehouseRow, index + 1));
 });
 
 cratehouse.forEach((crateRow) => {
