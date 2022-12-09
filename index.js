@@ -2,73 +2,119 @@
 exports.__esModule = true;
 var fs = require("fs");
 var data = fs.readFileSync("data.txt", "utf-8").split("\n");
-var wareHouseData = data.slice(0, 8);
-var instructionData = data.slice(10, data.length);
-var Crate = /** @class */ (function () {
-    function Crate(contents, row, column) {
-        if (row === void 0) { row = -1; }
-        if (column === void 0) { column = -1; }
-        this.contents = contents;
-        this.row = row;
-        this.column = column;
+var File = /** @class */ (function () {
+    function File(size, name) {
+        this.size = size;
+        this.name = name;
     }
-    return Crate;
+    return File;
 }());
-var Instructions = /** @class */ (function () {
-    function Instructions(moveAmount, from, to) {
-        this.moveAmount = moveAmount;
-        this.from = from - 1;
-        this.to = to - 1;
-    }
-    return Instructions;
-}());
-var cratehouse = [];
-var warehouse = [[], [], [], [], [], [], [], [], []];
-var instructionList = [];
-var pullOutGrid = function (rawData, rowIndex) {
-    var crates = [];
-    var justLetters = rawData.replace(/[^a-zA-Z0-9]/g, "");
-    justLetters.split("").forEach(function (letter) {
-        var letterIndex = rawData.indexOf(letter);
-        if (typeof rawData[letterIndex] === "string") {
-            rawData = rawData.replace(rawData[letterIndex], "_");
+var buildDirectory = function (input) {
+    var directory = new Map();
+    var path = "";
+    input.forEach(function (terminalInput) {
+        // create empty dir in directory
+        if (terminalInput.slice(0, 4) === "dir ") {
+            var tempDir = parseDirectory(terminalInput);
+            var directoryKey = tempDir + "/";
+            directory.set(path.concat(directoryKey), 0);
         }
-        letterIndex === 1 ? crates.push(new Crate(letter, rowIndex, 1)) : crates.push(new Crate(letter, rowIndex, (letterIndex + 3) / 4));
+        else if (terminalInput[0] === "$") {
+            //handle cd
+            path = cdHandler(terminalInput, path);
+        }
+        else {
+            var tempFile = parseFile(terminalInput);
+            directory.set(path.concat(tempFile.name), tempFile.size);
+        }
+        // do file stuff
     });
-    return crates;
+    return directory;
 };
-wareHouseData.forEach(function (warehouseRow, index) {
-    if (typeof data[warehouseRow.length] === "string") {
-        cratehouse.push(pullOutGrid(warehouseRow, index + 1));
+var parseFile = function (input) {
+    var parsed = input.split(" ");
+    var fileSize = parsed[0];
+    var fileName = parsed[1];
+    if (fileSize && fileName) {
+        return new File(parseInt(fileSize), fileName);
     }
-});
-cratehouse.forEach(function (crateRow) {
-    crateRow.forEach(function (crate) {
-        var _a;
-        (_a = warehouse[crate.column - 1]) === null || _a === void 0 ? void 0 : _a.push(crate.contents);
-    });
-});
-instructionData.forEach(function (i) {
-    var parsed = i.replace(/\D/g, "");
-    var from = parseInt(parsed[parsed.length - 2]);
-    var to = parseInt(parsed[parsed.length - 1]);
-    var moveAmount = parseInt(parsed.substring(0, parsed.length - 2));
-    instructionList.push(new Instructions(moveAmount, from, to));
-});
-console.log(warehouse);
-instructionList.forEach(function (instruction, index) {
-    var moveAmount = instruction.moveAmount, to = instruction.to, from = instruction.from;
-    console.log(instruction);
-    for (var i = 0; i < moveAmount; i++) {
-        if (warehouse && warehouse[from] && warehouse[to]) {
-            var fromColumn = warehouse[from];
-            var toColumn = warehouse[to];
-            if (fromColumn && (fromColumn === null || fromColumn === void 0 ? void 0 : fromColumn[0])) {
-                var crateToMove = fromColumn[0];
-                toColumn === null || toColumn === void 0 ? void 0 : toColumn.unshift(crateToMove);
-                fromColumn === null || fromColumn === void 0 ? void 0 : fromColumn.shift();
-            }
+    else
+        throw Error;
+};
+// pull directory NAME out of "dir NAME"
+var parseDirectory = function (input) {
+    var parsed = input.split(" ");
+    var directoryName = parsed[1];
+    if (directoryName) {
+        return directoryName;
+    }
+    else
+        throw Error;
+};
+var parseCD = function (input) {
+    var parsed = input.split(" ");
+    var path = parsed[2];
+    if (path) {
+        return path;
+    }
+    else
+        throw Error;
+};
+// remove last path and trailing "/" from path string
+var cdUp = function (path) {
+    var splitPath = path.split("/");
+    var rebuiltPath = "/";
+    splitPath.forEach(function (subpath, index) {
+        if (subpath != "" && index < splitPath.length - 2) {
+            rebuiltPath += subpath + "/";
         }
+    });
+    return rebuiltPath;
+};
+var cdHandler = function (terminalInput, path) {
+    if (terminalInput.slice(0, 6) === "$ cd /") {
+        console.log("found cd to root");
+        path = "/";
+    }
+    else if (terminalInput.slice(0, 7) === "$ cd ..") {
+        path = cdUp(path);
+    }
+    else if (terminalInput.slice(0, 5) === "$ cd " && (terminalInput[5] !== "." || "/")) {
+        path += parseCD(terminalInput) + "/";
+    }
+    return path;
+};
+var updateDirectoryFileSizes = function (directory) {
+    directory.forEach(function (size, path) {
+        if (path !== "/") {
+            var parents = pathsToClimb(path);
+            parents.forEach(function (parent) {
+                var currentSize = directory.get(parent);
+                if (typeof currentSize === "number") {
+                    directory.set(parent, currentSize + size);
+                }
+            });
+        }
+    });
+    return directory;
+};
+var pathsToClimb = function (path) {
+    var parents = [];
+    var parsedPath = path.split("/");
+    parsedPath = parsedPath.filter(function (e) { return e !== ""; });
+    var tempPath = "/";
+    parsedPath.forEach(function (pathPart) {
+        parents.push(tempPath);
+        tempPath = tempPath + pathPart + "/";
+    });
+    return parents;
+};
+var updatedDirectory = updateDirectoryFileSizes(buildDirectory(data));
+var answer = 0;
+updatedDirectory.forEach(function (value, key) {
+    console.log(key);
+    if (value <= 100000 && key[key.length - 1] === "/") {
+        answer += value;
     }
 });
-console.log(warehouse);
+console.log(answer);
