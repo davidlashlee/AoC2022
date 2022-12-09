@@ -2,6 +2,7 @@
 exports.__esModule = true;
 var fs = require("fs");
 var data = fs.readFileSync("data.txt", "utf-8").split("\n");
+var testData = fs.readFileSync("testData.txt", "utf-8").split("\n");
 var File = /** @class */ (function () {
     function File(size, name) {
         this.size = size;
@@ -11,6 +12,7 @@ var File = /** @class */ (function () {
 }());
 var buildDirectory = function (input) {
     var directory = new Map();
+    directory.set("/", 0);
     var path = "";
     input.forEach(function (terminalInput) {
         // create empty dir in directory
@@ -73,7 +75,6 @@ var cdUp = function (path) {
 };
 var cdHandler = function (terminalInput, path) {
     if (terminalInput.slice(0, 6) === "$ cd /") {
-        console.log("found cd to root");
         path = "/";
     }
     else if (terminalInput.slice(0, 7) === "$ cd ..") {
@@ -86,15 +87,13 @@ var cdHandler = function (terminalInput, path) {
 };
 var updateDirectoryFileSizes = function (directory) {
     directory.forEach(function (size, path) {
-        if (path !== "/") {
-            var parents = pathsToClimb(path);
-            parents.forEach(function (parent) {
-                var currentSize = directory.get(parent);
-                if (typeof currentSize === "number") {
-                    directory.set(parent, currentSize + size);
-                }
-            });
-        }
+        var parents = pathsToClimb(path);
+        parents.forEach(function (parent) {
+            var currentSize = directory.get(parent);
+            if (typeof currentSize === "number") {
+                directory.set(parent, currentSize + size);
+            }
+        });
     });
     return directory;
 };
@@ -110,11 +109,14 @@ var pathsToClimb = function (path) {
     return parents;
 };
 var updatedDirectory = updateDirectoryFileSizes(buildDirectory(data));
-var answer = 0;
+var totalDiskSpace = 70000000;
+var usedSpace = updatedDirectory.get("/");
+var spaceLeft = totalDiskSpace - usedSpace;
+var targetAmountofSpace = 30000000 - spaceLeft;
+var answer = 999999999999999;
 updatedDirectory.forEach(function (value, key) {
-    console.log(key);
-    if (value <= 100000 && key[key.length - 1] === "/") {
-        answer += value;
+    if (key[key.length - 1] === "/" && value >= targetAmountofSpace && value <= answer) {
+        answer = value;
     }
 });
 console.log(answer);
