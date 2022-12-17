@@ -19,8 +19,6 @@ const parseData = (data: string[]): number[][] => {
   return returnArray;
 };
 
-let parsedTrees = parseData(data);
-
 const checkNorth = (forest: number[][], row: number, column: number): boolean => {
   let currentTree = forest?.[row]?.[column];
   if (row <= 0) {
@@ -28,7 +26,6 @@ const checkNorth = (forest: number[][], row: number, column: number): boolean =>
   } else {
     for (let i = 0; i < row; i++) {
       let treeToCheck = forest?.[i]?.[column];
-      console.log("I", i, "treeToCheck", treeToCheck, "currentTree", currentTree);
       if (typeof treeToCheck === "number" && typeof currentTree === "number" && treeToCheck >= currentTree) {
         return false;
       }
@@ -91,44 +88,30 @@ const checkData = (data: number[][]): { north: number; east: number; south: numb
     south: 0,
     west: 0,
   };
-  let container: string[][] = [];
 
   data.forEach((dataRow, rowIndex) => {
-    let sample: string[] = [];
     dataRow.forEach((dataInstance, columnIndex) => {
       let north = checkNorth(data, rowIndex, columnIndex);
       if (north) {
-        console.log(rowIndex, columnIndex, "northed", dataInstance);
         count.north++;
-        sample.push("N");
       } else {
         let east = checkEast(data, rowIndex, columnIndex);
         if (east) {
-          console.log(rowIndex, columnIndex, "easted");
           count.east++;
-          sample.push("E");
         } else {
           let south = checkSouth(data, rowIndex, columnIndex);
           if (south) {
-            console.log(rowIndex, columnIndex, "southed");
             count.south++;
-            sample.push("S");
           } else {
             let west = checkWest(data, rowIndex, columnIndex);
             if (west) {
-              console.log(rowIndex, columnIndex, "wested");
               count.west++;
-              sample.push("W");
-            } else {
-              sample.push("X");
             }
           }
         }
       }
     });
-    container.push(sample);
   });
-  console.log(container);
   return count;
 };
 let results = checkData(parseData(data));
