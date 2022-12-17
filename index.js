@@ -3,120 +3,144 @@ exports.__esModule = true;
 var fs = require("fs");
 var data = fs.readFileSync("data.txt", "utf-8").split("\n");
 var testData = fs.readFileSync("testData.txt", "utf-8").split("\n");
-var File = /** @class */ (function () {
-    function File(size, name) {
-        this.size = size;
-        this.name = name;
-    }
-    return File;
-}());
-var buildDirectory = function (input) {
-    var directory = new Map();
-    directory.set("/", 0);
-    var path = "";
-    input.forEach(function (terminalInput) {
-        // create empty dir in directory
-        if (terminalInput.slice(0, 4) === "dir ") {
-            var tempDir = parseDirectory(terminalInput);
-            var directoryKey = tempDir + "/";
-            directory.set(path.concat(directoryKey), 0);
+var parseData = function (data) {
+    var returnArray = [];
+    data.forEach(function (row) {
+        var tempRow = [];
+        var rowSize = row.length;
+        for (var i = 0; i < rowSize; i++) {
+            var tree = row[i];
+            if (tree) {
+                tempRow.push(parseFloat(tree));
+            }
         }
-        else if (terminalInput[0] === "$") {
-            //handle cd
-            path = cdHandler(terminalInput, path);
-        }
-        else {
-            var tempFile = parseFile(terminalInput);
-            directory.set(path.concat(tempFile.name), tempFile.size);
-        }
-        // do file stuff
+        returnArray.push(tempRow);
     });
-    return directory;
+    return returnArray;
 };
-var parseFile = function (input) {
-    var parsed = input.split(" ");
-    var fileSize = parsed[0];
-    var fileName = parsed[1];
-    if (fileSize && fileName) {
-        return new File(parseInt(fileSize), fileName);
+var parsedTrees = parseData(data);
+var checkNorth = function (forest, row, column) {
+    var _a, _b;
+    var currentTree = (_a = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _a === void 0 ? void 0 : _a[column];
+    if (row <= 0) {
+        return true;
     }
-    else
-        throw Error;
-};
-// pull directory NAME out of "dir NAME"
-var parseDirectory = function (input) {
-    var parsed = input.split(" ");
-    var directoryName = parsed[1];
-    if (directoryName) {
-        return directoryName;
-    }
-    else
-        throw Error;
-};
-var parseCD = function (input) {
-    var parsed = input.split(" ");
-    var path = parsed[2];
-    if (path) {
-        return path;
-    }
-    else
-        throw Error;
-};
-// remove last path and trailing "/" from path string
-var cdUp = function (path) {
-    var splitPath = path.split("/");
-    var rebuiltPath = "/";
-    splitPath.forEach(function (subpath, index) {
-        if (subpath != "" && index < splitPath.length - 2) {
-            rebuiltPath += subpath + "/";
+    else {
+        for (var i = 0; i < row; i++) {
+            var treeToCheck = (_b = forest === null || forest === void 0 ? void 0 : forest[i]) === null || _b === void 0 ? void 0 : _b[column];
+            console.log("I", i, "treeToCheck", treeToCheck, "currentTree", currentTree);
+            if (typeof treeToCheck === "number" && typeof currentTree === "number" && treeToCheck >= currentTree) {
+                return false;
+            }
         }
+        return true;
+    }
+};
+var checkSouth = function (forest, row, column) {
+    var _a, _b;
+    var currentTree = (_a = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _a === void 0 ? void 0 : _a[column];
+    var maxColumnSize = (forest === null || forest === void 0 ? void 0 : forest[row].length) - 1;
+    if (currentTree && row === maxColumnSize) {
+        return true;
+    }
+    else {
+        for (var i = row; i < maxColumnSize; i++) {
+            var treeToCheck = (_b = forest === null || forest === void 0 ? void 0 : forest[i + 1]) === null || _b === void 0 ? void 0 : _b[column];
+            if (typeof treeToCheck === "number" && typeof currentTree === "number" && currentTree <= treeToCheck) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+var checkEast = function (forest, row, column) {
+    var _a, _b, _c;
+    var currentTree = (_a = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _a === void 0 ? void 0 : _a[column];
+    var numberOfTreesInRow = ((_b = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _b === void 0 ? void 0 : _b.length) - 1;
+    if (column === numberOfTreesInRow) {
+        return true;
+    }
+    // splitArray so its only checking the ones to the right?
+    var isVisible = (_c = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _c === void 0 ? void 0 : _c.every(function (tree, treeIndex) {
+        if (treeIndex > column && tree >= currentTree) {
+            return false;
+        }
+        else
+            return true;
     });
-    return rebuiltPath;
+    if (isVisible)
+        return isVisible;
+    return false;
 };
-var cdHandler = function (terminalInput, path) {
-    if (terminalInput.slice(0, 6) === "$ cd /") {
-        path = "/";
+var checkWest = function (forest, row, column) {
+    var _a, _b;
+    var currentTree = (_a = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _a === void 0 ? void 0 : _a[column];
+    if (column === 0) {
+        return true;
     }
-    else if (terminalInput.slice(0, 7) === "$ cd ..") {
-        path = cdUp(path);
-    }
-    else if (terminalInput.slice(0, 5) === "$ cd " && (terminalInput[5] !== "." || "/")) {
-        path += parseCD(terminalInput) + "/";
-    }
-    return path;
+    // splitArray so its only checking the ones to the left?
+    var isVisible = (_b = forest === null || forest === void 0 ? void 0 : forest[row]) === null || _b === void 0 ? void 0 : _b.every(function (tree, treeIndex) {
+        if (treeIndex < column && tree >= currentTree) {
+            return false;
+        }
+        else
+            return true;
+    });
+    if (isVisible)
+        return isVisible;
+    else
+        return false;
 };
-var updateDirectoryFileSizes = function (directory) {
-    directory.forEach(function (size, path) {
-        var parents = pathsToClimb(path);
-        parents.forEach(function (parent) {
-            var currentSize = directory.get(parent);
-            if (typeof currentSize === "number") {
-                directory.set(parent, currentSize + size);
+var checkData = function (data) {
+    var count = {
+        north: 0,
+        east: 0,
+        south: 0,
+        west: 0
+    };
+    var container = [];
+    data.forEach(function (dataRow, rowIndex) {
+        var sample = [];
+        dataRow.forEach(function (dataInstance, columnIndex) {
+            var north = checkNorth(data, rowIndex, columnIndex);
+            if (north) {
+                console.log(rowIndex, columnIndex, "northed", dataInstance);
+                count.north++;
+                sample.push("N");
+            }
+            else {
+                var east = checkEast(data, rowIndex, columnIndex);
+                if (east) {
+                    console.log(rowIndex, columnIndex, "easted");
+                    count.east++;
+                    sample.push("E");
+                }
+                else {
+                    var south = checkSouth(data, rowIndex, columnIndex);
+                    if (south) {
+                        console.log(rowIndex, columnIndex, "southed");
+                        count.south++;
+                        sample.push("S");
+                    }
+                    else {
+                        var west = checkWest(data, rowIndex, columnIndex);
+                        if (west) {
+                            console.log(rowIndex, columnIndex, "wested");
+                            count.west++;
+                            sample.push("W");
+                        }
+                        else {
+                            sample.push("X");
+                        }
+                    }
+                }
             }
         });
+        container.push(sample);
     });
-    return directory;
+    console.log(container);
+    return count;
 };
-var pathsToClimb = function (path) {
-    var parents = [];
-    var parsedPath = path.split("/");
-    parsedPath = parsedPath.filter(function (e) { return e !== ""; });
-    var tempPath = "/";
-    parsedPath.forEach(function (pathPart) {
-        parents.push(tempPath);
-        tempPath = tempPath + pathPart + "/";
-    });
-    return parents;
-};
-var updatedDirectory = updateDirectoryFileSizes(buildDirectory(data));
-var totalDiskSpace = 70000000;
-var usedSpace = updatedDirectory.get("/");
-var spaceLeft = totalDiskSpace - usedSpace;
-var targetAmountofSpace = 30000000 - spaceLeft;
-var answer = 999999999999999;
-updatedDirectory.forEach(function (value, key) {
-    if (key[key.length - 1] === "/" && value >= targetAmountofSpace && value <= answer) {
-        answer = value;
-    }
-});
-console.log(answer);
+var results = checkData(parseData(data));
+console.log(results);
+console.log(results.north + results.east + results.west + results.south);
